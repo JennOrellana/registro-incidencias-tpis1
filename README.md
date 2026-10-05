@@ -32,3 +32,8 @@ Esta aplicación está diseñada para registrar, clasificar y realizar el seguim
 ## Avance Semana 07: Primer Avance de Investigación
 * **Entregable:** Documentación conceptual de la necesidad, definición del usuario meta (Estudiantes UTEC) y especificación de los 4 requerimientos iniciales del sistema móvil.
 * **Estado Técnico:** Pantalla interactiva completamente funcional verificada bajo emulación en tiempo real.
+
+## Avance Semana 10: Teclado y Pantalla Táctica en RegistroIncidencias
+* **Teclado Contextual:** Se implementaron opciones avanzadas de teclado (`KeyboardOptions`) en el campo de texto de Título, configurando la capitalización automática de oraciones (`KeyboardCapitalization.Sentences`) y un botón de acción IME dinámico (`ImeAction.Next`) para agilizar el flujo de navegación del usuario.
+* **Interacción Táctil Integrada:** Se diseñó un selector de prioridades interactivo (Alta, Media, Baja) utilizando componentes de alto nivel `Card` y modificadores de contacto directo (`Modifier.clickable`), evitando sobrecargar el sistema con gestos complejos innecesarios.
+* **Retroalimentación de Estado:** Se vinculó el estado reactivo de Compose para modificar en tiempo real el color de fondo de la prioridad seleccionada y proyectar un mensaje descriptivo inmediato en la base del formulario, confirmando al usuario la persistencia visual de sus elecciones táctiles.
