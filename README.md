@@ -43,3 +43,8 @@ Esta aplicación está diseñada para registrar, clasificar y realizar el seguim
 - **Propósito Funcional:** Implementación de un mecanismo de interacción cinética (gesto de agitación o *shake*). Al detectar una aceleración que supera el umbral vectorial de 12 m/s², las variables de estado local (`titulo`, `descripcion`, `prioridad`) se restablecen automáticamente a sus valores iniciales, optimizando la agilidad de descarte de datos en el campo de trabajo.
 - **Manejo de Excepciones:** Se incorporó un sistema de validación condicional interactiva mediante el operador de casteo seguro (`as? SensorManager`). En entornos virtuales donde el sensor físico no se encuentre disponible (como la herramienta Compose Preview), la aplicación conmuta su estado visual a un contenedor de error controlado, evitando el colapso del hilo principal de ejecución (`NullPointerException`).
 - **Verificación Técnica:** Validado bajo emulación activa y simulación de aceleración tridimensional, comprobando la limpieza inmediata de las variables de memoria retenidas.
+
+### Semana 14: Instrumentación del Ciclo de Vida (Actual)
+Para esta entrega, modifiqué la clase principal `MainActivity.kt` para auditar y entender el comportamiento real del sistema operativo Android.
+*   Implementé logs de telemetría nativos con `Log.d` en los callbacks principales: `onCreate`, `onStart`, `onResume`, `onPause`, `onStop` y `onDestroy`.
+*   Toda la salida se puede monitorear de forma limpia en la ventana de **Logcat** aplicando el filtro oficial: `TPIS1_LIFECYCLE`.
