@@ -6,6 +6,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.util.Log // Componente fundamental de telemetría para la bitácora
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
@@ -41,15 +42,45 @@ import androidx.compose.ui.unit.dp
 import sv.edu.utec.etps1.registroincidencias.ui.theme.RegistroIncidenciasTheme
 import kotlin.math.sqrt
 
-// ACTIVIDAD EVALUADA: SEGUNDO AVANCE DE INVESTIGACIÓN Y EVIDENCIA TÉCNICA CON SENSOR - SEMANA 11
+// ACTIVIDAD EVALUADA: INSTRUMENTACIÓN DEL CICLO DE VÍA CON LOGCAT - SEMANA 14
 class MainActivity : ComponentActivity() {
+
+    // Etiqueta única de filtrado obligatoria definida por la rúbrica de evaluación
+    private val tag = "TPIS1_LIFECYCLE"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(tag, "onCreate: Instanciando la Activity y construyendo el árbol de Compose.")
         setContent {
             RegistroIncidenciasTheme {
                 RegistroIncidenciasApp()
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d(tag, "onStart: La interfaz gráfica pasa a ser visible para el usuario de la UTEC.")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(tag, "onResume: La Activity posee el foco interactivo y el acelerómetro está operativo.")
+    }
+
+    override fun onPause() {
+        Log.d(tag, "onPause: Perdiendo el foco táctil de la pantalla. Transición inminente a segundo plano.")
+        super.onPause()
+    }
+
+    override fun onStop() {
+        Log.d(tag, "onStop: La aplicación ha dejado de ser visible por completo en el terminal.")
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        Log.d(tag, "onDestroy: Liberando memoria y destruyendo la instancia de la MainActivity.")
+        super.onDestroy()
     }
 }
 
@@ -71,6 +102,7 @@ fun RegistroIncidenciasApp() {
     var sensorDisponible by remember { mutableStateOf(acelerometro != null) }
     var mensajeSensor by remember { mutableStateOf(if (acelerometro != null) "Sensor listo. Agita suavemente para limpiar el formulario." else "Acelerómetro no disponible en este entorno.") }
 
+    // Control del ciclo de vida del hardware mediante DisposableEffect aislado
     // Control del ciclo de vida del hardware mediante DisposableEffect aislado
     if (sensorManager != null && acelerometro != null) {
         DisposableEffect(acelerometro) {
@@ -106,12 +138,21 @@ fun RegistroIncidenciasApp() {
                         ultimaZ = z
                     }
                 }
-                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+                    // Requerimiento obligatorio de la interfaz de SensorEventListener
+                }
             }
+
             sensorManager.registerListener(listener, acelerometro, SensorManager.SENSOR_DELAY_NORMAL)
-            onDispose { sensorManager.unregisterListener(listener) }
+
+            onDispose {
+                sensorManager.unregisterListener(listener)
+            }
         }
     }
+
+    // --- SEGUNDA PARTE ADAPTADA CON EXACTITUD ---
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -161,7 +202,9 @@ fun RegistroIncidenciasApp() {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Card(
-                modifier = Modifier.weight(1f).clickable { prioridad = "Alta" },
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { prioridad = "Alta" },
                 colors = CardDefaults.cardColors(
                     containerColor = if (prioridad == "Alta") Color(0xFFFADBD8) else MaterialTheme.colorScheme.surfaceVariant
                 )
@@ -170,7 +213,9 @@ fun RegistroIncidenciasApp() {
             }
 
             Card(
-                modifier = Modifier.weight(1f).clickable { prioridad = "Media" },
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { prioridad = "Media" },
                 colors = CardDefaults.cardColors(
                     containerColor = if (prioridad == "Media") Color(0xFFFCF3CF) else MaterialTheme.colorScheme.surfaceVariant
                 )
@@ -179,7 +224,9 @@ fun RegistroIncidenciasApp() {
             }
 
             Card(
-                modifier = Modifier.weight(1f).clickable { prioridad = "Baja" },
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { prioridad = "Baja" },
                 colors = CardDefaults.cardColors(
                     containerColor = if (prioridad == "Baja") Color(0xFFD5F5E3) else MaterialTheme.colorScheme.surfaceVariant
                 )
@@ -209,10 +256,8 @@ fun RegistroIncidenciasApp() {
             text = "Prioridad seleccionada en pantalla: $prioridad\n$mensaje",
             style = MaterialTheme.typography.bodyLarge
         )
-
         Spacer(modifier = Modifier.height(24.dp))
-
-        // PANEL DE TELEMETRÍA DEL SENSOR (REQUERIMIENTO OBLIGATORIO SEMANA 11)
+// PANEL DE TELEMETRÍA DEL SENSOR (REQUERIMIENTO OBLIGATORIO SEMANA 11)
         Card(
             colors = CardDefaults.cardColors(
                 containerColor = if (sensorDisponible) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.errorContainer
@@ -235,7 +280,6 @@ fun RegistroIncidenciasApp() {
         }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 fun RegistroIncidenciasPreview() {
