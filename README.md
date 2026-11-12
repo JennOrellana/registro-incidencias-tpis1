@@ -48,3 +48,7 @@ Esta aplicación está diseñada para registrar, clasificar y realizar el seguim
 Para esta entrega, modifiqué la clase principal `MainActivity.kt` para auditar y entender el comportamiento real del sistema operativo Android.
 *   Implementé logs de telemetría nativos con `Log.d` en los callbacks principales: `onCreate`, `onStart`, `onResume`, `onPause`, `onStop` y `onDestroy`.
 *   Toda la salida se puede monitorear de forma limpia en la ventana de **Logcat** aplicando el filtro oficial: `TPIS1_LIFECYCLE`.
+
+## Avance Semana 16: Estado de pantalla con ViewModel
+- **Gestión de Estado:** Se implementó la clase `IncidenciaViewModel` (heredando de `ViewModel`) para separar la lógica de estado de la interfaz gráfica.
+- **Persistencia de Datos:** Se trasladaron las variables del formulario (`titulo` y `prioridad`) hacia el contenedor de estado. Los eventos de la interfaz, como la entrada de texto y la selección táctil, se conectaron a las funciones del ViewModel, logrando que la información sobreviva a los cambios de configuración (rotación de pantalla) sin perder los datos ingresados.

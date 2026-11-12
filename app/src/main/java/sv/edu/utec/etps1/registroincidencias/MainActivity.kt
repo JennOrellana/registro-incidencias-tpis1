@@ -6,7 +6,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
-import android.util.Log // Componente fundamental de telemetría para la bitácora
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
@@ -37,15 +37,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel // Importación agregada
 import sv.edu.utec.etps1.registroincidencias.ui.theme.RegistroIncidenciasTheme
 import kotlin.math.sqrt
 
 // ACTIVIDAD EVALUADA: INSTRUMENTACIÓN DEL CICLO DE VÍA CON LOGCAT - SEMANA 14
 class MainActivity : ComponentActivity() {
 
-    // Etiqueta única de filtrado obligatoria definida por la rúbrica de evaluación
     private val tag = "TPIS1_LIFECYCLE"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,13 +84,11 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun RegistroIncidenciasApp() {
+fun RegistroIncidenciasApp(vm: IncidenciaViewModel = viewModel()) {
     val context = LocalContext.current
 
-    // Variables de estado del formulario (Semana 10)
-    var titulo by remember { mutableStateOf("") }
+    // Variables de estado locales que NO están en el ViewModel
     var descripcion by remember { mutableStateOf("") }
-    var prioridad by remember { mutableStateOf("Ninguna") }
     var mensaje by remember { mutableStateOf("Aún no hay reporte creado") }
 
     // Variables de estado del sensor (Semana 11)
@@ -102,8 +99,6 @@ fun RegistroIncidenciasApp() {
     var sensorDisponible by remember { mutableStateOf(acelerometro != null) }
     var mensajeSensor by remember { mutableStateOf(if (acelerometro != null) "Sensor listo. Agita suavemente para limpiar el formulario." else "Acelerómetro no disponible en este entorno.") }
 
-    // Control del ciclo de vida del hardware mediante DisposableEffect aislado
-    // Control del ciclo de vida del hardware mediante DisposableEffect aislado
     if (sensorManager != null && acelerometro != null) {
         DisposableEffect(acelerometro) {
             val listener = object : SensorEventListener {
@@ -127,11 +122,11 @@ fun RegistroIncidenciasApp() {
 
                         if (velocidad > UMBRAL_AGITACION) {
                             // Gesto de agitación detectado: Restablecer interfaz de forma reactiva
-                            titulo = ""
-                            descripcion = ""
-                            prioridad = "Ninguna"
-                            mensaje = "Aún no hay reporte creado"
-                            mensajeSensor = "¡Formulario restablecido mediante el acelerómetro!"
+                            //   vm.actualizarTitulo("") // Actualiza mediante ViewModel
+                            //  descripcion = ""
+                            //  vm.actualizarPrioridad("Ninguna") // Actualiza mediante ViewModel
+                            // mensaje = "Aún no hay reporte creado"
+                            // mensajeSensor = "¡Formulario restablecido mediante el acelerómetro!"
                         }
                         ultimaX = x
                         ultimaY = y
@@ -139,9 +134,7 @@ fun RegistroIncidenciasApp() {
                     }
                 }
 
-                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-                    // Requerimiento obligatorio de la interfaz de SensorEventListener
-                }
+                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
             }
 
             sensorManager.registerListener(listener, acelerometro, SensorManager.SENSOR_DELAY_NORMAL)
@@ -152,7 +145,6 @@ fun RegistroIncidenciasApp() {
         }
     }
 
-    // --- SEGUNDA PARTE ADAPTADA CON EXACTITUD ---
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -170,8 +162,8 @@ fun RegistroIncidenciasApp() {
         Spacer(modifier = Modifier.height(20.dp))
 
         OutlinedTextField(
-            value = titulo,
-            onValueChange = { titulo = it },
+            value = vm.titulo, // Conectado al ViewModel
+            onValueChange = { vm.actualizarTitulo(it) }, // Conectado al ViewModel
             label = { Text("Título de incidencia") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
@@ -204,9 +196,9 @@ fun RegistroIncidenciasApp() {
             Card(
                 modifier = Modifier
                     .weight(1f)
-                    .clickable { prioridad = "Alta" },
+                    .clickable { vm.actualizarPrioridad("Alta") },
                 colors = CardDefaults.cardColors(
-                    containerColor = if (prioridad == "Alta") Color(0xFFFADBD8) else MaterialTheme.colorScheme.surfaceVariant
+                    containerColor = if (vm.prioridad == "Alta") Color(0xFFFADBD8) else MaterialTheme.colorScheme.surfaceVariant
                 )
             ) {
                 Text(text = "🔴 Alta", modifier = Modifier.padding(12.dp).align(Alignment.CenterHorizontally), style = MaterialTheme.typography.bodyMedium)
@@ -215,9 +207,9 @@ fun RegistroIncidenciasApp() {
             Card(
                 modifier = Modifier
                     .weight(1f)
-                    .clickable { prioridad = "Media" },
+                    .clickable { vm.actualizarPrioridad("Media") },
                 colors = CardDefaults.cardColors(
-                    containerColor = if (prioridad == "Media") Color(0xFFFCF3CF) else MaterialTheme.colorScheme.surfaceVariant
+                    containerColor = if (vm.prioridad == "Media") Color(0xFFFCF3CF) else MaterialTheme.colorScheme.surfaceVariant
                 )
             ) {
                 Text(text = "🟡 Media", modifier = Modifier.padding(12.dp).align(Alignment.CenterHorizontally), style = MaterialTheme.typography.bodyMedium)
@@ -226,9 +218,9 @@ fun RegistroIncidenciasApp() {
             Card(
                 modifier = Modifier
                     .weight(1f)
-                    .clickable { prioridad = "Baja" },
+                    .clickable { vm.actualizarPrioridad("Baja") },
                 colors = CardDefaults.cardColors(
-                    containerColor = if (prioridad == "Baja") Color(0xFFD5F5E3) else MaterialTheme.colorScheme.surfaceVariant
+                    containerColor = if (vm.prioridad == "Baja") Color(0xFFD5F5E3) else MaterialTheme.colorScheme.surfaceVariant
                 )
             ) {
                 Text(text = "🟢 Baja", modifier = Modifier.padding(12.dp).align(Alignment.CenterHorizontally), style = MaterialTheme.typography.bodyMedium)
@@ -238,7 +230,7 @@ fun RegistroIncidenciasApp() {
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { mensaje = "Reporte preparado: $titulo [Prioridad: $prioridad]" },
+            onClick = { mensaje = "Reporte preparado: ${vm.titulo} [Prioridad: ${vm.prioridad}]" },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Crear reporte")
@@ -253,11 +245,11 @@ fun RegistroIncidenciasApp() {
         Spacer(modifier = Modifier.height(6.dp))
 
         Text(
-            text = "Prioridad seleccionada en pantalla: $prioridad\n$mensaje",
+            text = "Prioridad seleccionada en pantalla: ${vm.prioridad}\n$mensaje",
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(modifier = Modifier.height(24.dp))
-// PANEL DE TELEMETRÍA DEL SENSOR (REQUERIMIENTO OBLIGATORIO SEMANA 11)
+
         Card(
             colors = CardDefaults.cardColors(
                 containerColor = if (sensorDisponible) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.errorContainer
@@ -278,12 +270,5 @@ fun RegistroIncidenciasApp() {
                 )
             }
         }
-    }
-}
-@Preview(showBackground = true)
-@Composable
-fun RegistroIncidenciasPreview() {
-    RegistroIncidenciasTheme {
-        RegistroIncidenciasApp()
     }
 }
